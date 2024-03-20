@@ -236,7 +236,7 @@ print(absOf(vec)) # prints 5.0
 print(absOf(box)) # AttributeError: 'Box' object has no attribute 'abs'
 ```
 
-[Godbolt](https://godbolt.org/z/a5cW3G4xq)
+[Godbolt](https://godbolt.org/z/ssxa43vof)
 
 ---
 
