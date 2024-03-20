@@ -241,3 +241,25 @@ print(absOf(box)) # AttributeError: 'Box' object has no attribute 'abs'
 ---
 
 ## Manifest vs. Inferred
+
+| Manifest                                                       |                                                        Inferred |
+| :------------------------------------------------------------- | --------------------------------------------------------------: |
+| All types must be <i style="color:#22d;">explicitly</i> stated | All types can be <i style="color:#22d;">implicitly</i> inferred |
+
+Again a spectrum, different levels of inference are possible. Ranging from basic expression level to full program. An example type system that allows for full program type inference is called Hindley-Milner (HM). This will be discussed more in the next presentation.
+
+---
+
+## Example
+
+Most languages have adopted type inference (C++ or Java for examples?)
+
+```cpp
+auto main() -> int {
+    double pi = 3.14;
+    auto alsoPi = 3.14;
+    
+    double someConstant = 10; // known to be double
+    auto whoops = 10;         // inferred as int instead of double
+}
+```
