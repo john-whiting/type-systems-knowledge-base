@@ -1,5 +1,5 @@
 ---
-theme: simple
+theme: css/my-theme.css
 ---
 ## Type Systems Day 1
 ### By: Jaran Chao and John Whiting
@@ -26,18 +26,18 @@ theme: simple
 
 ## Static vs. Dynamic
 
-| Static Typing                                                              |                                                        Dynamic Typing |
-| :------------------------------------------------------------------------- | --------------------------------------------------------------------: |
-| The type of a variable is known at <i style="color:#22d;">compile time</i> | The type of a variable is known at <i style="color:#22d;">runtime</i> |
-| The type of a variable <i style="color:#e22;">cannot</i> change            |          The type of a variable <i style="color:#4e4;">can</i> change |
+| Static Typing                                                                 |                                                           Dynamic Typing |
+| :---------------------------------------------------------------------------- | -----------------------------------------------------------------------: |
+| The type of a variable is known at <i style="color:#4e85e4;">compile time</i> | The type of a variable is known at <i style="color:#4e85e4;">runtime</i> |
+| The type of a variable <i style="color:#ef3535;">cannot</i> change            |          The type of a variable <i style="color:#4def4d;">can</i> change |
 
 ---
 
 ## Strong vs. Weak
 
-Strong Typing                                         | Weak Typing
-:-----------------------------------------------------|-----------------------------------------------------:
- <i style="color:#e22;">Never</i> possible to convert | <i style="color:#4e4;">Always</i> possible to convert
+| Strong Typing                                           |                                              Weak Typing |
+| :------------------------------------------------------ | -------------------------------------------------------: |
+| <i style="color:#ef3535;">Never</i> possible to convert | <i style="color:#4def4d;">Always</i> possible to convert |
 
 There are no standardized/agreed upon definitions for strong and weakly typed languages.
 However, the above terms will be used for the rest of the presentation. <!-- element style="font-size: 1.5rem;" -->
@@ -125,10 +125,10 @@ public class Main {
 
 ## Nominal vs. Structural
 
-| Nominal                                                                |                                                                      Structural |
-| :--------------------------------------------------------------------- | ------------------------------------------------------------------------------: |
-| Determines if types are equal based on <i style="color:#22d;">name</i> | Determines if types are equal based on <i style="color:#22d;">structure</i>     |
-| Types are <i style="color:#22d;">explicitly</i> declared to be related | Types are <i style="color:#22d;">implicitly</i> related if the structures match |
+| Nominal                                                                   |                                                                         Structural |
+| :------------------------------------------------------------------------ | ---------------------------------------------------------------------------------: |
+| Determines if types are equal based on <i style="color:#4e85e4;">name</i> |     Determines if types are equal based on <i style="color:#4e85e4;">structure</i> |
+| Types are <i style="color:#4e85e4;">explicitly</i> declared to be related | Types are <i style="color:#4e85e4;">implicitly</i> related if the structures match |
 
 ---
 
@@ -138,9 +138,7 @@ Come back later to decide best language (probably just C++?)
 
 ---
 
-## Structural Example
-
-Come back later to decide best language (probably just Go?)
+## Structural Example (Go)
 
 ```go
 type Abser interface {
@@ -161,12 +159,14 @@ type Box struct {
     Value float64
 }
 
-// var _ Abser = (*Box)(nil) // won't succeed as a Box is not an Abser implicitly (it doesn't have the structure of an Abser)
+var _ Abser = (*Box)(nil) // won't succeed as a Box is not an Abser implicitly (it doesn't have the structure of an Abser)
 ```
 
 [Godbolt](https://godbolt.org/z/4ohxYc3Gh)
 
-A C++ example with C++20 concepts is possible, should it be used?
+---
+
+## Structural Example (C++)
 
 ```cpp
 #include <concepts>
@@ -190,7 +190,7 @@ struct Box {
     double value;
 };
 
-// static_assert(Absable<Box>); // fails as Box does not have the abs method, dictated by the Absable concept
+static_assert(Absable<Box>); // fails as Box does not have the abs method, dictated by the Absable concept
 ```
 
 [Godbolt](https://godbolt.org/z/cEPb3Y89K)
@@ -201,9 +201,9 @@ struct Box {
 
 If it walks like a duck and quacks like a duck, then it must be a duck! 
 
-| Structural Typing                                                            |                                                             Duck Typing |
-| :--------------------------------------------------------------------------- | ----------------------------------------------------------------------: |
-| Checks for structural equivalence at <i style="color:#22d;">compile time</i> | Checks for structural equivalence at <i style="color:#22d;">runtime</i> |
+| Structural Typing                                                               |                                                                Duck Typing |
+| :------------------------------------------------------------------------------ | -------------------------------------------------------------------------: |
+| Checks for structural equivalence at <i style="color:#4e85e4;">compile time</i> | Checks for structural equivalence at <i style="color:#4e85e4;">runtime</i> |
 
 ---
 
@@ -242,9 +242,9 @@ print(absOf(box)) # AttributeError: 'Box' object has no attribute 'abs'
 
 ## Manifest vs. Inferred
 
-| Manifest                                                       |                                                        Inferred |
-| :------------------------------------------------------------- | --------------------------------------------------------------: |
-| All types must be <i style="color:#22d;">explicitly</i> stated | All types can be <i style="color:#22d;">implicitly</i> inferred |
+| Manifest                                                          |                                                           Inferred |
+| :---------------------------------------------------------------- | -----------------------------------------------------------------: |
+| All types must be <i style="color:#4e85e4;">explicitly</i> stated | All types can be <i style="color:#4e85e4;">implicitly</i> inferred |
 
 Again a spectrum, different levels of inference are possible. Ranging from basic expression level to full program. An example type system that allows for full program type inference is called Hindley-Milner (HM). This will be discussed more in the next presentation.
 
