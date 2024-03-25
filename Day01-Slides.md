@@ -477,3 +477,16 @@ type Output = Brainfuck<Program, Input>; // = "!dlrow ,olleH"
 ```
 
 [typefuck](https://github.com/susisu/typefuck)
+
+---
+
+## Conclusion
+
+Many properties of type systems:
+- Strong vs. Weak Typing
+- Static vs. Dynamic
+- Nominal vs. Structural
+- Duck Typing
+- Manifest vs. Inferred
+- Type Inference
+- Turing Completeness
