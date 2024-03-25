@@ -1,5 +1,5 @@
 ---
-theme: simple
+theme: css/my-theme.css
 ---
 ## Type Systems Day 2
 ### By: Jaran Chao and John Whiting
@@ -9,11 +9,7 @@ theme: simple
 ## Overview
 
 ### Advanced properties of type systems
-- Type Inference
-	- Algo W
-	- Algo J
-	- Algo M
-- Turing Completeness (as a derivative of Inferred languages
+
 - Flow sensitive
 - Dependent
 - Refinement
@@ -21,3 +17,31 @@ theme: simple
 - Gradual
 - Substructural
 - Language Safety
+
+---
+
+## Flow Sensitive
+
+---
+
+## Dependent
+
+---
+
+## Refinement
+
+---
+
+## Intersection
+
+---
+
+## Gradual
+
+---
+
+## Substructural
+
+---
+
+## Language Safety

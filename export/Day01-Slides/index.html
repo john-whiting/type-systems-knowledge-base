@@ -101,6 +101,10 @@
 - Nominal vs. Structural
 - Duck Typing
 - Manifest vs. Inferred
+
+### Advanced properties of type systems
+- Type Inference
+- Turing Completeness
 </div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
 <div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
 
@@ -382,8 +386,6 @@ print(absOf(box)) # AttributeError: 'Box' object has no attribute 'abs'
 | Manifest                                                          |                                                           Inferred |
 | :---------------------------------------------------------------- | -----------------------------------------------------------------: |
 | All types must be <i style="color:#4e85e4;">explicitly</i> stated | All types can be <i style="color:#4e85e4;">implicitly</i> inferred |
-
-Again a spectrum, different levels of inference are possible. Ranging from basic expression level to full program. An example type system that allows for full program type inference is called Hindley-Milner (HM). This will be discussed more in the next presentation.
 </div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
 <div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
 
@@ -415,6 +417,155 @@ auto main() -> int {
         </tr>
     </tbody>
 </table>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Type Inference
+
+|    | *Type Inference* [n]                                                      |
+| -: | ------------------------------------------------------------------------- |
+| 1. | The automatic detection of the type of an expression in a formal language |
+
+A spectrum ranging from basic expression level to a full program.
+An example type system that allows for full program type inference is called Hindley-Milner (HM).
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Type Inference (Rust)
+
+```rust
+// (note that this is typically not done for creating vectors.
+// `vec![]` is used instead.)
+fn main() {
+    let mut items = Vec::new(); // Initially => Vec<{unknown}>
+
+    items.push(2); // items => Vec<i32>
+    items.push(6);
+    items.push(1);
+    items.push(3);
+
+    println!("{items:?}");
+}
+```
+
+[Godbolt](https://godbolt.org/z/c6vz4shze)
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Type Inference (Kotlin)
+
+```kotlin
+fun <T> MutableList<T>.maybeAddSomeElements() {}
+
+fun printLong(long: Long?) {
+    println(long ?: -1L)
+}
+
+inline fun <reified T> printInnerType(list: List<T>) {
+    println("`$list has type $`{T::class}")
+}
+
+fun main() {
+    val list = buildList {
+        maybeAddSomeElements()
+        
+        val firstElem = getOrNull(0)
+        printLong(firstElem)
+    } // inferred to be List<Long>
+    
+    printInnerType(list)
+}
+```
+
+[Kotlin Playground](https://pl.kotl.in/doHt0utnH)
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Type Inference (Algo W)
+
+<img src="imgs/algorithm-w.png" alt="" style="object-fit: scale-down">
+
+
+[Wikipedia](https://en.wikipedia.org/wiki/Hindley%E2%80%93Milner_type_system#Algorithm_W)
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Type Inference (Algo J)
+
+<img src="imgs/algorithm-j.png" alt="" style="object-fit: scale-down">
+
+
+[Wikipedia](https://en.wikipedia.org/wiki/Hindley%E2%80%93Milner_type_system#Algorithm_J)
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Type Inference (Algo M)
+
+<img src="imgs/algorithm-m.png" alt="" style="object-fit: scale-down">
+
+
+[ACM Journal Vol. 20 No. 4](https://dl.acm.org/doi/10.1145/291891.291892)
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Turing Completeness
+
+|    | *Turing Complete* [adj]                                                 |
+| -: | ----------------------------------------------------------------------- |
+| 1. | A type system is Turing complete if it can simulate any Turing machine. |
+
+<table>
+    <thead>
+        <tr>
+            <td></td>
+            <td><b><i>Turing Machine</i> [n]</b></td>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td style="border-bottom: unset">1.</td>
+            <td style="border-bottom: unset">An abstract computation machine that manipulates symbols on a tape strip.</td>
+        </tr>
+        <tr>
+            <td>2.</td>
+            <td>A machine that can implement any algorithm.</td>
+        </tr>
+    </tbody>
+</table>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Turing Completeness (cont.)
+
+Popular languages that have Turing complete type systems.
+
+<table style="margin: 0;">
+    <tbody>
+        <tr>
+            <td style="color: #3074c0;">TypeScript</td>
+            <td style="color: #f74c00;">Rust</td>
+            <td style="color: #6295cb;">C++</td>
+            <td style="color: #d73322;">Scala</td>
+            <td style="color: #5e5086">Haskell</td>
+        </tr>
+    </tbody>
+</table>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Turing Completeness (TS)
+
+The BrainFuck language written using only types
+
+```ts
+import type { Brainfuck } from "@susisu/typefuck";
+
+type Program = ">,[>,]<[.<]";
+type Input = "Hello, world!";
+type Output = Brainfuck<Program, Input>; // = "!dlrow ,olleH"
+```
+
+[typefuck](https://github.com/susisu/typefuck)
 </div></script></section></div>
     </div>
 
