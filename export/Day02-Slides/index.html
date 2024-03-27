@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+    <title></title>
+    <link rel="stylesheet" href="dist/reveal.css" />
+    <link rel="stylesheet" href="css/my-theme.css" id="theme" />
+    <link rel="stylesheet" href="plugin/highlight/zenburn.css" />
+	<link rel="stylesheet" href="css/layout.css" />
+	<link rel="stylesheet" href="plugin/customcontrols/style.css">
+
+
+
+    <script defer src="dist/fontawesome/all.min.js"></script>
+
+	<script type="text/javascript">
+		var forgetPop = true;
+		function onPopState(event) {
+			if(forgetPop){
+				forgetPop = false;
+			} else {
+				parent.postMessage(event.target.location.href, "app://obsidian.md");
+			}
+        }
+		window.onpopstate = onPopState;
+		window.onmessage = event => {
+			if(event.data == "reload"){
+				window.document.location.reload();
+			}
+			forgetPop = true;
+		}
+
+		function fitElements(){
+			const itemsToFit = document.getElementsByClassName('fitText');
+			for (const item in itemsToFit) {
+				if (Object.hasOwnProperty.call(itemsToFit, item)) {
+					var element = itemsToFit[item];
+					fitElement(element,1, 1000);
+					element.classList.remove('fitText');
+				}
+			}
+		}
+
+		function fitElement(element, start, end){
+
+			let size = (end + start) / 2;
+			element.style.fontSize = `${size}px`;
+
+			if(Math.abs(start - end) < 1){
+				while(element.scrollHeight > element.offsetHeight){
+					size--;
+					element.style.fontSize = `${size}px`;
+				}
+				return;
+			}
+
+			if(element.scrollHeight > element.offsetHeight){
+				fitElement(element, start, size);
+			} else {
+				fitElement(element, size, end);
+			}		
+		}
+
+
+		document.onreadystatechange = () => {
+			fitElements();
+			if (document.readyState === 'complete') {
+				if (window.location.href.indexOf("?export") != -1){
+					parent.postMessage(event.target.location.href, "app://obsidian.md");
+				}
+				if (window.location.href.indexOf("print-pdf") != -1){
+					let stateCheck = setInterval(() => {
+						clearInterval(stateCheck);
+						window.print();
+					}, 250);
+				}
+			}
+	};
+
+
+        </script>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides"><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Type Systems Day 2
+### By: Jaran Chao and John Whiting
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Overview
+
+### Advanced properties of type systems
+
+- Language Safety
+- Flow sensitive
+- Intersection
+- Refinement
+- Dependent
+- Gradual
+- Substructural
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Language Safety
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Flow Sensitive
+
+The type is made more specific with control flow
+
+Done by validating operations like type predicates, imperative updates, and control flow. <!-- .element: style="font-size: 1.5rem" -->
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Flow Sensitive (Kotlin)
+
+```kotlin
+sealed interface Node {}
+
+data class IntNode(val value: Int) : Node
+data class NegNode(val node: Node) : Node
+data class AddNode(val lhs: Node, val rhs: Node) : Node
+data class MulNode(val lhs: Node, val rhs: Node) : Node
+
+fun eval(n: Node): Int {
+    return when (n) {
+        is IntNode -> n.value
+        is NegNode -> -eval(n.node)
+        is AddNode -> eval(n.lhs) + eval(n.rhs)
+        is MulNode -> eval(n.lhs) * eval(n.rhs)
+    }
+}
+
+fun main() {
+    println(eval(MulNode(
+        NegNode(
+            IntNode(3)
+        ),
+        AddNode(
+            IntNode(4),
+            IntNode(5),
+        ),
+    )))
+}
+```
+
+[Kotlin Playground](https://pl.kotl.in/-_-SXizFK)
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Flow Sensitive (Rust)
+
+Pattern matching is an alternative to flow sensitive
+
+```rust
+enum Node {
+    Int(i32),
+    Neg(Box<Node>),
+    Add(Box<Node>, Box<Node>),
+    Mul(Box<Node>, Box<Node>),
+}
+
+fn eval(n: Node) -> i32 {
+    match n {
+        Node::Int(i) => i,
+        Node::Neg(node) => -eval(*node),
+        Node::Add(lhs, rhs) => eval(*lhs) + eval(*rhs),
+        Node::Mul(lhs, rhs) => eval(*lhs) * eval(*rhs),
+    }
+}
+
+pub fn main() {
+    println!("{}", eval(Node::Mul(
+        Box::new(
+            Node::Neg(
+                Box::new(Node::Int(3)),
+            ),
+        ),
+        Box::new(
+            Node::Add(
+                Box::new(Node::Int(4)),
+                Box::new(Node::Int(5)),
+            ),
+        ),
+    )));
+}
+```
+
+[Godbolt](https://godbolt.org/z/dEh4cos9b)
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Flow Sensitive Example (TS)
+
+```ts
+interface User {
+  __typename: "user",
+  email: string,
+};
+
+interface Group {
+  __typename: "group",
+  name: string,
+};
+
+function stringify(obj: User | Group) {
+  if (obj.__typename === "user") {
+    return `User(${obj.email})`;
+  }
+  return `Group(${obj.name})`;
+}
+
+const userExample = {
+  __typename: "user" as const,
+  email: "johndoe@example.com",
+};
+
+const groupExample = {
+  __typename: "group" as const,
+  name: "My Group",
+};
+
+const roleExample = {
+  __typename: "role" as const,
+  accessLevel: 3,
+}
+
+console.log(stringify(userExample));
+console.log(stringify(groupExample));
+console.log(stringify(roleExample)); // Error: Not assignable to User | Group
+```
+
+[TS Playground](https://www.typescriptlang.org/play?#code/JYOwLgpgTgZghgYwgAgKoGdrIN4ChnID6hYAngA4QhwC2EAXMgEQCumUTANPshDXMAA2jdGCigA5twC+Ably5QkWIhQBxKAHsW5HD2JlK1OoyYStOrj2MNko8SCm45CmCxAIwwTSDtjJwDCkABSaAEYAVowYWAA+yBra5ACUegSByKGRAHQGFFS0KAC8Jcxs0EypeAQEUBBgLFC+AAYxUMEAJNjhEdl8AoLSyc3yBNIKtfWNLYk6nd05NkMjzgoIPqLI5VAAogAetOSCxWlEJPk2pttMyHDoyOsgotwE-UKmEZoAFiAAJpoQAACEAONCOEGy6xoVhcuEem3MSX2h2OyCKpzyRkKpkRllu93hYBeyEuzAAsqQEhZyDD5HCNmBkFpjsiwaj0dUzoYCiZmMyIDc7g8GcTEEh0OgADIQABuEGEyAAzDI1htNMdsoJNBJgvYAkFgttWeDksl5PD1RCtTq9Y5AiFceRjcdTfIAPRu4VPS2a7W6-x2g3850QV3ID3IHZQLRQRgAOU0jLu6GAEmoYVRYE0aHYyHis3IQA)
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Intersection
+
+Result of combining two types without contradictions
+
+Note that this is more like a union operation in set theory than an intersection operation. <!-- .element: style="font-size: 1.5rem" -->
+`$\{1, 2, 3\}\cup\{2, 3, 4\}=\{1, 2, 3, 4\}$`
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Intersection Example (TS)
+
+```ts
+interface Reader {
+  email: string,
+  readBooks: string[],
+};
+
+interface Author {
+  name: string,
+  publishedBooks: string[],
+};
+
+type AuthorWhoReads = Reader & Author;
+
+function stringify(obj: AuthorWhoReads): string {
+  return `
+`${obj.name} ($`{obj.email}) has published:
+  - ${obj.publishedBooks.join("\n    - ")}
+
+And has read:
+  - ${obj.readBooks.join("\n    - ")}
+`;
+}
+
+const reader = {
+  email: "wshakespeare@example.com",
+  readBooks: [
+    "The Tragicall Historye of Romeus and Juliet",
+    "Menaechmi",
+  ]
+};
+
+const author = {
+  name: "William Shakespeare",
+  publishedBooks: [
+    "Romeo and Juliet",
+    "The Brothers Menaechmus",
+  ],
+};
+
+const authorWhoReads = { ...reader, ...author };
+
+console.log(stringify(authorWhoReads));
+console.log(stringify(reader)); // Error: missing properties: name, publishedBooks
+console.log(stringify(author)); // Error: missing properties: email, readBooks
+```
+
+[TS Playground](https://www.typescriptlang.org/play?#code/JYOwLgpgTgZghgYwgAgEoTgE2sg3gKGWQgFs5gAbALmQGcwpQBzAGkOSg0wCEB7XgNa0a9RiCYBtALpsAvgG58+UJFiIUAQQCuYABa8oediDgkIIhszZEADloBGFYLV0Qe-IRbGSZ+BUrAATxtNHX0oAHV9dCxaZABeNC4cADJkbT0DRXwYLRAEMGBeEDpLcWAYQIAKXnsAKxoM8KjeGMxaAEovZiMiTjAtKBKAA3wAElxauoA6EzNZZCqJqenScgpZDuRdODi7R2dXTCp2AFpkZfrp-acXNz5BWmm63lAqgCIAHRLkc-eO2RKDQgTDbXYcLgnIjnS4zThYB5CZ6vEAfb7Q5D-QHDbKAhDFegQrA4RIEIhrSg0d4AdxccAEEFoITgnAAAhAAB6mGwUCDTfEkd7WInuR40CTsIjvAAqrmQ0qgcCYwAQcAoFGQAAlnGADIEULwYGheGYtHE4CDkAApLROCBgIWSzEAWQgJggCF0JGAjqIUj82XxIEJcDCBgSvWQc3MmIilCcpmQAGUdgymRhOL7kDdDvcPMJkBKiFLUCaILxkBbQTa7Q7hVLZShuFBeHpoHFXe7PSQzVnfP58EGQ2HItEuHFSchptP4dgoCwp9PQ5lDAOh7xedMKLwmFVRMwKtVl80x7EOh1FAB6S-Ideb7e7-flSpVWfQc-yZDX5AAUSgLagGhvVoWgehsFsQigQpGRoaMFxzO5RSEfBvzvPkHz3MplRfY8DA-L8bz-ACgOcUDxGzCDoGggsKQoBdZ0RWggA)
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Intersection Example (TS)
+
+Contradicting types cannot be combined
+
+```ts
+interface Foo {
+    bar: number,
+};
+
+interface Baz {
+    bar: string,
+};
+
+type Qux = Foo & Baz;
+
+const test: Qux = {
+    bar: true, // Error: type 'boolean' is not assignable to type 'never'
+};
+```
+
+[TS Playground](https://www.typescriptlang.org/play?#code/JYOwLgpgTgZghgYwgAgGIHt3IN4ChkHIBGcUAXMiAK4C2R0ANLgL4DcuuoksiKAQnABeOfIRLlkAZzBRQAcyZsOYAJ4AHFAEUqAD2QBeNJmQAyZAMHtcCdCGnJI0itr2G8hYqQoyqEBsgB6AOQAUSgodAlVDWQAciJMABsIOBBY5GBJSnQwZDhJSWA5EDgiZIcsaJRYkAgAN2hYllYgA)
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Refinement
+
+The type is made more specific based on a predicate
+
+`$f : \mathbb{N}\rightarrow\{n\in\mathbb{N}\;\vert\; n \gt 5\}$`
+
+Note that this is restricted form of intersection types. <!-- .element: style="font-size: 1.5rem" -->
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Refinement Example (TS)
+
+```ts
+interface User {
+  email: string,
+  accessLevel: number,
+};
+
+interface AuthorizedUser {
+  authorizedEmail: string,
+};
+
+function authorize(user: User): AuthorizedUser {
+  if (user.accessLevel < 5) {
+    throw new Error(`${user.email} is not authorized! Level: ${user.accessLevel}.`);
+  }
+  return { authorizedEmail: user.email };
+}
+
+function doAdminThings(user: AuthorizedUser) {
+  console.log(`${user.authorizedEmail} deleted all database tables.`);
+}
+
+  
+
+const adminUser = {
+  email: "admin@example.com",
+  accessLevel: 5,
+};
+
+const authedAdminUser = authorize(adminUser);
+doAdminThings(authedAdminUser);
+
+
+
+const regularUser = {
+  email: "regular@example.com",
+  accessLevel: 2,
+}
+
+const authedRegularUser = authorize(regularUser); // Throws runtime error
+doAdminThings(authedRegularUser); // Never gets called
+```
+
+[TS Playground](https://www.typescriptlang.org/play?#code/JYOwLgpgTgZghgYwgAgKoGdrIN4ChnIQC2cwANgFzLphSgDmANPsokuugDIQBuElyEAFciAI2jMAvgG5cuUJFiIUAQSFgAFgHs6ALwgATDFjwE467XsMBREuSo06IJrhlyYQkAjDAtIVhY6wPoAFEKYUFTGUACUVGqaQfpGETgswDDIYREAdGwQHNx8ZMgAPMgArDFpBASaUFoA7oIQzdZQDVAhAAYAJNjh0DnEpGSSyMDoglpgAYlWBgCEyEX8VP2DUHkI7Fy8-JI53TGyBJJyBFAQYEJQ-thzlsE2dgKbw6-Ibue4Hl4+fmQBi0KgMRFAABUNAx0NloPFAgtotVTMgEH50FoyBAcmQtPQehtcuZ5s8DLZRuMDPxroZWGQSgY4GA4KI4JhkCzRNj0EcTq45HJ0SAaKwwaBosgALw1QivKgAIjg4pAAAEIAAPOBEAAO2Jy6KICuYZh2BT2xSoFSkslwwtFJI0hlB4JAkpljqSEBCytdyNkwJdkOhzlhjudKv9grtGNmV3oQjIcCg7tlI3syAV8cTyfVWt1+sNxpY+UK+wEACYpELY49DAAlCAJpMp1IexHPELZlv+5AAej7yChDUaUygnh8RBQ0E6uEDKqhMJ9FgbTZzregJ37g4AcvsoMh6Ncpgg4AzDEA)
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Refinement Example (L-H)
+
+```
+{-@ type VectorEq a X = {v:Vector a | vlen v == vlen X} @-}
+
+{-@ dotProduct :: (Num a) => x:Vector a -> VectorEq a x -> a @-}
+dotProduct x y = sum [ (x ! i) * (y ! i) | i <- [0 .. n - 1]]
+    where
+        n = length x
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Refinement Wrappers
+
+Popular languages that have refinement capabilities.
+
+- Rust: [Flux](https://github.com/flux-rs/flux) ([ACM Digital Library](https://dl.acm.org/doi/10.1145/3591283))
+- TypeScript: [refscript](https://github.com/UCSD-PL/refscript) ([ACM Digital Library](https://dl.acm.org/doi/10.1145/2908080.2908110))
+- Scala: (v1+) [refined](https://github.com/fthomas/refined), (v3+) [Scala docs](https://scala-lang.org/files/archive/spec/3.4/03-types.html#refined-types)
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Dependent
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Gradual
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Substructural
+</div></script></section></div>
+    </div>
+
+    <script src="dist/reveal.js"></script>
+
+    <script src="plugin/markdown/markdown.js"></script>
+    <script src="plugin/highlight/highlight.js"></script>
+    <script src="plugin/zoom/zoom.js"></script>
+    <script src="plugin/notes/notes.js"></script>
+    <script src="plugin/math/math.js"></script>
+	<script src="plugin/mermaid/mermaid.js"></script>
+	<script src="plugin/chart/chart.min.js"></script>
+	<script src="plugin/chart/plugin.js"></script>
+	<script src="plugin/customcontrols/plugin.js"></script>
+
+    <script>
+      function extend() {
+        var target = {};
+        for (var i = 0; i < arguments.length; i++) {
+          var source = arguments[i];
+          for (var key in source) {
+            if (source.hasOwnProperty(key)) {
+              target[key] = source[key];
+            }
+          }
+        }
+        return target;
+      }
+
+	  function isLight(color) {
+		let hex = color.replace('#', '');
+
+		// convert #fff => #ffffff
+		if(hex.length == 3){
+			hex = `${hex[0]}${hex[0]}${hex[1]}${hex[1]}${hex[2]}${hex[2]}`;
+		}
+
+		const c_r = parseInt(hex.substr(0, 2), 16);
+		const c_g = parseInt(hex.substr(2, 2), 16);
+		const c_b = parseInt(hex.substr(4, 2), 16);
+		const brightness = ((c_r * 299) + (c_g * 587) + (c_b * 114)) / 1000;
+		return brightness > 155;
+	}
+
+	var bgColor = getComputedStyle(document.documentElement).getPropertyValue('--r-background-color').trim();
+	var isLight = isLight(bgColor);
+
+	if(isLight){
+		document.body.classList.add('has-light-background');
+	} else {
+		document.body.classList.add('has-dark-background');
+	}
+
+      // default options to init reveal.js
+      var defaultOptions = {
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+        transition: 'default', // none/fade/slide/convex/concave/zoom
+        plugins: [
+          RevealMarkdown,
+          RevealHighlight,
+          RevealZoom,
+          RevealNotes,
+          RevealMath.MathJax3,
+		  RevealMermaid,
+		  RevealChart,
+		  RevealCustomControls,
+        ],
+
+
+    	allottedTime: 120 * 1000,
+
+		mathjax3: {
+			mathjax: 'plugin/math/mathjax/tex-mml-chtml.js',
+		},
+		markdown: {
+		  gfm: true,
+		  mangle: true,
+		  pedantic: false,
+		  smartLists: false,
+		  smartypants: false,
+		},
+
+		mermaid: {
+			theme: isLight ? 'default' : 'dark',
+		},
+
+		customcontrols: {
+			controls: [
+			]
+		},
+      };
+
+      // options from URL query string
+      var queryOptions = Reveal().getQueryHash() || {};
+
+      var options = extend(defaultOptions, {"width":960,"height":700,"margin":0.04,"controls":true,"progress":true,"slideNumber":false,"transition":"slide","transitionSpeed":"default"}, queryOptions);
+    </script>
+
+    <script>
+      Reveal.initialize(options);
+    </script>
+  </body>
+
+  <!-- created with Advanced Slides -->
+</html>
