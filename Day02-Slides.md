@@ -255,40 +255,36 @@ Note that this is restricted form of intersection types. <!-- element style="fon
 
 ```ts
 interface User {
-  email: string,
-  accessLevel: number,
+    email: string,
+    accessLevel: number,
 };
 
 interface AuthorizedUser {
-  authorizedEmail: string,
+    authorizedEmail: string,
 };
 
 function authorize(user: User): AuthorizedUser {
-  if (user.accessLevel < 5) {
-    throw new Error(`${user.email} is not authorized! Level: ${user.accessLevel}.`);
-  }
-  return { authorizedEmail: user.email };
+    if (user.accessLevel < 5) {
+        throw new Error(`${user.email} is not authorized! Level: ${user.accessLevel}.`);
+    }
+    return { authorizedEmail: user.email };
 }
 
 function doAdminThings(user: AuthorizedUser) {
-  console.log(`${user.authorizedEmail} deleted all database tables.`);
+    console.log(`${user.authorizedEmail} deleted all database tables.`);
 }
 
-  
-
 const adminUser = {
-  email: "admin@example.com",
-  accessLevel: 5,
+    email: "admin@example.com",
+    accessLevel: 5,
 };
 
 const authedAdminUser = authorize(adminUser);
 doAdminThings(authedAdminUser);
 
-
-
 const regularUser = {
-  email: "regular@example.com",
-  accessLevel: 2,
+    email: "regular@example.com",
+    accessLevel: 2,
 }
 
 const authedRegularUser = authorize(regularUser); // Throws runtime error
@@ -361,15 +357,15 @@ Some types are annotated and checked at compile time and some may be left untype
 
 ## Some Type Theory Terminology
 
-|    | *Top Type* [n]                                                                    |
-| -: | --------------------------------------------------------------------------------- |
-| 1. | A type that is the supertype of all other types.                                  |
-| 2. | The type in which <i style="color:#4def4d;">all</i> variables can be assigned to. |
+|    | *Top Type* [n]                                                                 |
+| -: | ------------------------------------------------------------------------------ |
+| 1. | A type that is the supertype of all other types.                               |
+| 2. | The type in which <i style="color:#4def4d;">all</i> variables can be assigned. |
 
-|    | *Bottom Type* [n]                                                                |
-| -: | -------------------------------------------------------------------------------- |
-| 1. | A type that is the subtype of all other types.                                   |
-| 2. | The type in which <i style="color:#ef3535;">no</i> variables can be assigned to. |
+|    | *Bottom Type* [n]                                                             |
+| -: | ----------------------------------------------------------------------------- |
+| 1. | A type that is the subtype of all other types.                                |
+| 2. | The type in which <i style="color:#ef3535;">no</i> variables can be assigned. |
 
 ---
 
@@ -427,9 +423,7 @@ class Program
 
 ## Substructural
 
-The types are constrained by the substructural rules from substructural logic. 
-
-Put another way, the types are defined based on number of uses.
+The types are constrained by the substructural rules from substructural logic. Put another way, the types are defined based on number of uses.
 
 | Type     |                   Use |
 | :------- | --------------------: |
@@ -500,3 +494,16 @@ auto main() -> int {
 ```
 
 [Godbolt](https://godbolt.org/z/q9avEv5cz)
+
+---
+
+## Conclusion
+
+Many advanced type system properties:
+- Language Safety
+- Flow sensitive
+- Intersection
+- Refinement
+- Dependent
+- Gradual
+- Substructural
