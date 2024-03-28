@@ -22,6 +22,7 @@ theme: css/my-theme.css
 
 ## Language Safety
 
+Type systems allow us to "prove" certain aspects of our programs are correct. Each of the covered type systems allow us to "prove" different aspects of our programs to ensure that they never fail.
 
 ---
 
@@ -244,7 +245,7 @@ const test: Qux = {
 
 The type is made more specific based on a predicate
 
-$$f : \mathbb{N}\rightarrow\{n\in\mathbb{N}\;\vert\; n \gt 5\}$$
+$$f : \mathbb{N}\rightarrow\{n\in\mathbb{N}\:\vert\:n\gt5\}$$
 
 Note that this is restricted form of intersection types. <!-- element style="font-size: 1.5rem;" -->
 
@@ -300,7 +301,7 @@ doAdminThings(authedRegularUser); // Never gets called
 
 ## Refinement Example (L-H)
 
-```
+```hs
 {-@ type VectorEq a X = {v:Vector a | vlen v == vlen X} @-}
 
 {-@ dotProduct :: (Num a) => x:Vector a -> VectorEq a x -> a @-}
@@ -308,6 +309,10 @@ dotProduct x y = sum [ (x ! i) * (y ! i) | i <- [0 .. n - 1]]
     where
         n = length x
 ```
+
+[LiquidHaskell](https://ucsd-progsys.github.io/liquidhaskell/)
+
+Refinement types commonly utilize SMT Solvers to prove refinements <!-- element style="font-size: 1.5rem;" -->
 
 ---
 
@@ -323,16 +328,175 @@ Popular languages that have refinement capabilities.
 
 ## Dependent
 
+The definition of the type is dependent on the type's value. Often seen in the theorem proving languages.
 
+<table style="margin: 0;">
+    <tbody>
+        <tr>
+            <td><a href="https://wiki.portal.chalmers.se/agda/pmwiki.php">Agda</a></td>
+            <td><a style="color: #d5be99;" href="https://coq.inria.fr/">Coq</a></td>
+            <td><a style="color: #00f;" href="https://www.cs.bu.edu/~hwxi/atslangweb/">ATS</a></td>
+            <td><a style="color: #ee131f;" href="https://www.fstar-lang.org/">F</a></td>
+            <td><a style="color: #aa0000;" href="https://www.idris-lang.org/">Idris</a></td>
+            <td><a href="https://lean-lang.org/">Lean</a></td>
+        </tr>
+    </tbody>
+</table>
+
+Done by predicate logic through type predicates, universal, and existential quantifiers. <!-- element style="font-size: 1.5rem;" -->
+
+---
+
+## Dependent vs Refinement
+
+Dependent types expose a general logical language as powerful as higher order logic, whereas refinement types expose a very restricted logical language that SMT solvers can handle.
 
 ---
 
 ## Gradual
 
+Some types are annotated and checked at compile time and some may be left untyped to be checked at runtime. This can be seen as a merging of static and dynamic typing.
 
+---
+
+## Some Type Theory Terminology
+
+|    | *Top Type* [n]                                                                    |
+| -: | --------------------------------------------------------------------------------- |
+| 1. | A type that is the supertype of all other types.                                  |
+| 2. | The type in which <i style="color:#4def4d;">all</i> variables can be assigned to. |
+
+|    | *Bottom Type* [n]                                                                |
+| -: | -------------------------------------------------------------------------------- |
+| 1. | A type that is the subtype of all other types.                                   |
+| 2. | The type in which <i style="color:#ef3535;">no</i> variables can be assigned to. |
+
+---
+
+## How does it work
+
+A untyped expression is given the type dynamic, commonly denoted as `?`. This type acts as the top type and is cast-able down the type hierarchy to the bottom type. 
+
+In practice, to achieve the cast-ability down to bottom type, expression of the dynamic type are assumed to support any operation. <!-- element style="font-size: 1.5rem;" -->
+
+---
+
+## Gradual Example (Python)
+
+```python
+def identity(x):
+    return x
+
+def square(num: int | float):
+    return num * num
+    
+print(square(10))
+print(identity(10))
+
+print(square(15.5))
+print(identity(15.5))
+
+print(square("oops")) # TypeError: can't multiply sequence by non-int of type 'str'
+print(identity("oops"))
+```
+
+[Godbolt](https://godbolt.org/z/jdqEs9Pfh)
+
+---
+
+## Gradual Example (C#)
+
+```csharp
+using System;
+
+class Program
+{
+    static dynamic Square(dynamic num) => num * num;
+    static void Main()
+    {
+        Console.WriteLine(Square(10));
+        Console.WriteLine(Square(15.5));
+        Console.WriteLine(Square("oops")); // Operator '*' cannot be applied to operands of type 'string' and 'string'
+    }
+}
+```
+
+[Godbolt](https://godbolt.org/z/vdqxT1893)
 
 ---
 
 ## Substructural
 
+The types are constrained by the substructural rules from substructural logic. 
 
+Put another way, the types are defined based on number of uses.
+
+| Type     |                   Use |
+| :------- | --------------------: |
+| Ordered  | Exactly once in order |
+| Linear   | Exactly once          |
+| Affine   | At most once          |
+| Relevant | At least once         |
+| Normal   | Arbitrarily           |
+
+---
+
+## Affine Example (Rust)
+
+```rust
+struct Coin;
+struct Candy;
+struct Drink;
+
+fn buy_candy(_: Coin) -> Candy { Candy }
+fn buy_drink(_: Coin) -> Drink { Drink }
+
+pub fn main() {
+    let coin = Coin;
+    let candy = buy_candy(coin); // The lifetime of the coin variable ends here.
+    let drink = buy_drink(coin); // Compilation error: Use of moved variable that does not possess the Copy trait.
+}
+```
+
+[Godbolt](https://godbolt.org/z/5EK94h9cr)
+
+---
+
+## Linear Example
+
+Theoretical behavior in Rust but not actually enforced. Languages with Linear Types include [Vale](https://vale.dev/), [ATS](https://www.cs.bu.edu/~hwxi/atslangweb/), and [Austral](https://github.com/austral/austral/tree/master).
+
+```rust
+{
+    // Must be passed on, not dropped.
+    let token = HotPotato{};
+
+    // Suppose not every branch does away with it:
+    if (!queue.is_full()) {
+        queue.push(token);
+    }
+
+    // Compilation error: Holding an undroppable object as the scope ends.
+}
+```
+
+---
+
+## Normal Example (C++)
+
+```cpp
+struct Coin {};
+struct Candy {};
+struct Drink {};
+
+auto buy_candy(std::unique_ptr<Coin> c) { return Candy{}; }
+auto buy_drink(std::unique_ptr<Coin> c) { return Drink{}; }
+
+auto main() -> int {
+    auto coin = std::make_unique<Coin>();
+    auto candy = buy_candy(std::move(coin));
+    auto drink = buy_drink(std::move(coin)); // This is valid C++.
+}
+```
+
+[Godbolt](https://godbolt.org/z/q9avEv5cz)

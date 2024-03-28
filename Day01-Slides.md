@@ -267,7 +267,7 @@ If it walks like a duck and quacks like a duck, then it must be a duck!
 
 ---
 
-## Duck Typing Example
+## Duck Typing Example (Python)
 
 ```python
 from dataclasses import dataclass
@@ -303,7 +303,7 @@ print(absOf(box)) # AttributeError: 'Box' object has no attribute 'abs'
 
 ---
 
-## Example
+## Example (C++)
 
 ```cpp
 auto main() -> int {
